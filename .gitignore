@@ -1,8 +1,0 @@
-#folders
-node_modules/
-logs/
-
-# files
-.gitignore
-.env
-
