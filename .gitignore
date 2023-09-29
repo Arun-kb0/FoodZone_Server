@@ -1,7 +1,8 @@
 #folders
-node_mmodules
-logs
+node_modules/
+logs/
 
 # files
+.gitignore
 .env
 
