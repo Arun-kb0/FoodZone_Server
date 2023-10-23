@@ -38,6 +38,30 @@ export const getRecomentedRestaurants = async (req: Request, res: Response) => {
 }
 
 
+export const getDishes = async (req: Request, res: Response) => {
+  const { restaurantId } = req.query
+
+  try {
+    if (typeof restaurantId === 'string' && restaurantId.length === 24) {
+      const restaurantObjId = mongoose.Types.ObjectId.createFromHexString(restaurantId)
+      const dishes = await dishModel.findById(restaurantObjId)
+      res.status(httpStatus.OK).json({ message: 'getDishes success', dishes })
+      return
+    } else {
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'restaurantId is not valid' })
+      return
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'getDishes failed', error })
+  }
+}
+
+
+
+
+
+
 
 
 export const createResuturant = async (req: Request, res: Response) => {
@@ -63,7 +87,7 @@ export const addDish = async (req: Request, res: Response) => {
     const isResturantDishesExsist = await dishModel.findById(restaurantObjId)
     console.log(isResturantDishesExsist)
 
-    let addedDish: dishesType | null 
+    let addedDish: dishesType | null
     if (isResturantDishesExsist) {
       addedDish = await dishModel.findByIdAndUpdate(
         { _id: restaurantObjId },

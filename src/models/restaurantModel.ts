@@ -1,4 +1,4 @@
-import mongoose,{Document , Schema} from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 
 type OpeningHoursType = {
@@ -14,14 +14,15 @@ type OpeningHoursType = {
 
 
 interface restaurantType extends Document {
-  name:string,
+  name: string,
   cuisine: string,
   deliveryDelay: string,
   imageUrl: string,
-  distance:string,
+  distance: string,
   rating: number,
+  menu: string[],
   openingHours: OpeningHoursType
-  location:{lat: string , long:string}
+  location: { lat: string, long: string }
   timeStamp: Date
 }
 
@@ -33,6 +34,7 @@ const restaurantSchema = new Schema<restaurantType>({
   imageUrl: { type: String, required: true },
   distance: { type: String, required: true },
   rating: { type: Number, required: true },
+  menu: { type: [String], default: [] },
   openingHours: {
     monday: String,
     tuesday: String,
@@ -44,16 +46,16 @@ const restaurantSchema = new Schema<restaurantType>({
   },
   location: {
     lat: String,
-    long:String
+    long: String
   },
-  timeStamp:{type:Date , default:new Date()}
+  timeStamp: { type: Date, default: new Date() }
 })
 
-export const restaurantModel = mongoose.model<restaurantType>('restaurants',restaurantSchema)
+export const restaurantModel = mongoose.model<restaurantType>('restaurants', restaurantSchema)
 
 
 
-const restaurants =  [
+const restaurants = [
   {
     "name": "Noodle House",
     "cuisine": "Japanese",

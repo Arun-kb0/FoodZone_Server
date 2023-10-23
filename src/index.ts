@@ -3,6 +3,7 @@ import { corsOptions } from './config/corsOptions'
 import cors from 'cors'
 import restaruantRouter from './routes/restaruantRoutes'
 import dishRouter from './routes/dishRoute'
+import authRouter from './routes/authRoute'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import { logHttpErrors, logRequests } from './middleware/createHttpLogs'
@@ -31,7 +32,7 @@ app.use(logRequests)
 // logger.log('error', 'error log success', { meta: { filename: 'error.log' } })
 
 
-
+app.use('/auth', authRouter)
 app.use('/restaurant', restaruantRouter)
 app.use('/dish', dishRouter)
 
