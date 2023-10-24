@@ -4,17 +4,19 @@ interface userType extends Document {
   id: string,
   name: string,
   email: string,
+  password:string,
   phone: string,
   imageUrl: string,
   timeStamp:Date,
 }
 
 const userSchema = new mongoose.Schema<userType>({
-  id: { type: String, required: true },
+  id: { type: String,},
   name:{type:String,required:true},
-  email: { type: String, },
-  phone: { type: String, },
-  imageUrl: { type: String, },
+  email: { type: String, default: null },
+  password: { type: String, default: null },
+  phone: { type: String, default: null },
+  imageUrl: { type: String, default:null},
   timeStamp:{type:Date, default: new Date()}
 })
 

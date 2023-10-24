@@ -2,17 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import { httpStatus } from '../constants/httpStatus';
 
-
-interface tokenDecodedType {
-  azp: string;
-  aud: string;
-  sub: string;
-  scope: string;
-  exp: string;
-  expires_in: string;
-  email: string;
-  email_verified: string;
-}
+// ! finish auth  , add git attributes , delete v1 branch and cretate new 
 
 export interface authRequest extends Request {
   userId?: string
@@ -20,22 +10,13 @@ export interface authRequest extends Request {
 
 export const auth = async (req: authRequest, res: Response, next: NextFunction) => {
 
-
-  const isTokenExpiered = (decodedData: tokenDecodedType) => {
-    if (decodedData.exp) {
-      const currentTime = Math.floor(Date.now() / 1000)
-      return currentTime >= parseInt(decodedData.exp)
-
-    }
-  }
-
   try {
     const token = req.headers?.authorization?.split(" ")[1]
     const provider = req.headers?.tokenprovider
     console.log('token length ', token?.length)
     console.log('provider ', provider)
-    console.log(req.headers)
-    
+    // console.log(req.headers)
+
     if (token && provider) {
       let decodedData
       if (provider === 'server') {
@@ -61,11 +42,12 @@ export const auth = async (req: authRequest, res: Response, next: NextFunction) 
 
       } else if (provider === 'meta') {
         console.log('meta token')
-        // decodedData = jwt.decode(token)
-        decodedData = await fetch(`https://graph.facebook.com/app?access_token=${token}`)
-
+        const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`)
+        if (response.ok) {
+          decodedData = await response.json()
+          req.userId = decodedData?.id
+        }
       }
-
       console.log(decodedData)
     }
     next()
