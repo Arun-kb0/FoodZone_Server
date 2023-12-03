@@ -6,9 +6,9 @@ import dishRouter from './routes/dishRoute'
 import authRouter from './routes/authRoute'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
-import { logHttpErrors, logRequests } from './middleware/createHttpLogs'
-import logger from './logger/loggerIndex'
-
+import {  globalErrorHandler, httpLogger } from './middleware/createHttpLogs'
+import { httpStatus } from './constants/httpStatus'
+import { CustomError } from './util/customeError'
 
 const app = express()
 dotenv.config()
@@ -23,13 +23,7 @@ const CONNECTION_URL = process.env.CONNECTION_URL || ''
 app.use(cors(corsOptions))
 app.use(express.json())
 
-app.use(logRequests)
-
-
-// logger.log('info', 'request log success', { meta: { filename: 'request.log' } })
-// logger.log('info', 'res log success', { meta: { filename: 'response.log' } })
-// logger.log('info', 'http error log success', { meta: { filename: 'httpError.log' } })
-// logger.log('error', 'error log success', { meta: { filename: 'error.log' } })
+// app.use(httpLogger)
 
 
 app.use('/auth', authRouter)
@@ -39,11 +33,17 @@ app.use('/dish', dishRouter)
 
 
 app.get('/', (req: Request, res: Response): void => {
-  res.status(200).json({ message: "hellow" })
+  res.status(200).json({ message: "hello" })
 })
 
 
-app.use(logHttpErrors)
+app.all('*', (req: Request, res: Response,next:NextFunction): void => {
+  const error = new CustomError('route not found', httpStatus.NOT_FOUND)
+  next(error)
+})
+
+app.use(globalErrorHandler)
+
 
 mongoose.connect(CONNECTION_URL)
   .then(() =>

@@ -1,25 +1,70 @@
 import { Request, Response, NextFunction } from "express"
-import logger from "../logger/loggerIndex"
+import logger, { formatHTTPLoggerResponse }  from "../logger/loggerIndex"
+import { CustomError } from "../util/customeError"
+import { httpStatus } from "../constants/httpStatus"
 
 
 
-export const logRequests = (req: Request, res: Response, next: NextFunction) => {
+export const httpLogger = (req: Request, res: Response, next: NextFunction, message?: string) => {
+  console.log(res)
   logger.log(
     'info',
-    `{ method: ${req.method}, url: ${req.url} , origin: ${req.headers.origin} , responseStatus:${res.statusCode } }`,
-    { meta: { filename: 'requests.log' } }
+    message? message : '',
+    {
+      logData:formatHTTPLoggerResponse(req, res),
+      filename: 'httpLogs.log',
+    }
   )
   next()
 }
 
 
-export const logHttpErrors = (error: Error, req: Request, res: Response,next:NextFunction) => {
+
+const formatedErrorLog = (error: CustomError, req: Request, res: Response) => {
+  return {
+    errorName: error.name,
+    errorMessage: error.message,
+    errorStack: error.stack,
+    request: {
+      method: req.method,
+      url: req.url,
+      origin: req.headers.origin,
+      host: req.headers.host,
+      clentIp: req?.headers['x-forwarded-for'] || req.socket.remoteAddress,
+    },
+    response: {
+      header: res.getHeaders(),
+      statuscode: res.statusCode,
+    }
+  }
+}
+
+
+export const globalErrorHandler = (error: CustomError, req: Request, res: Response, next: NextFunction)=>{
+  
+  if (error.name === 'TokenExpiredError') {
+    error.statusCode = httpStatus.UNAUTHORIZED
+  }
+
+  error.statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR 
+  res.status(error.statusCode).json({
+    status: error.status,
+    name:error.name,
+    message: error.message
+  })
+
   logger.log(
-    'error',
-    `{ errorName: ${error.name} ,errorMessage: ${error.message},errorStack: ${error.stack} , method: ${req.method}, url: ${req.url}, origin:${req.headers?.origin}}`,
-    {meta: {filename:'httpErrors.log'}}
+    'info',
+    error.message,
+    {
+      logData: formatedErrorLog(error,req,res),
+      filename: 'ErrorLogs.log',
+    }
   )
-  next()
+
 }
+
+
+
 
 

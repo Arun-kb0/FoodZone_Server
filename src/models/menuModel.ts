@@ -6,7 +6,6 @@ interface menuType extends Document{
   timeStamp: Date
 }
 
-
 const menuSchema = new mongoose.Schema<menuType>({
   dishName: { type: String, required: true },
   imageUrl: { type: String, required: true },

@@ -3,9 +3,10 @@ import { addMenu, getMenu } from '../controllers/dishController'
 
 const router = express.Router()
 
+
 router.get('/menu', getMenu)
 
-router.post('/addMenu',addMenu)
+router.post('/addMenu' ,addMenu)
 
 
 export default router
