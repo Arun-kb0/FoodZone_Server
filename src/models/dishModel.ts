@@ -1,27 +1,42 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-export interface dishType extends Document {
-  dishName: string,
-  description: string,
-  imageUrl: string,
-  price: number,
-  rating: number,
-  timeStamp: Date
-}
+// export interface dishType extends Document {
+//   dishName: string,
+//   description: string,
+//   imageUrl: string,
+//   price: number,
+//   rating: number,
+//   timeStamp: Date
+// }
+
+export type dishType = {
+  id: string;
+  dishName: string;
+  description: string;
+  cuisineName: string;
+  price: number;
+  rating: number;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 
 export interface dishesType extends Document {
   _id: typeof mongoose.Types.ObjectId,
-  dishes:dishType[]
+  dishes: dishType[]
 }
 
 
 const DishSchema = new Schema<dishType>({
   dishName: { type: String, required: true },
   description: { type: String, required: true },
+  cuisineName: { type: String },
   price: { type: Number, required: true },
   rating: { type: Number, required: true },
   imageUrl: { type: String, required: true },
-  timeStamp: { type: Date, default: new Date() }
+  createdAt: { type: String },
+  updatedAt: { type: String }
 })
 
 

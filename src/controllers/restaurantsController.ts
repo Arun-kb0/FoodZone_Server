@@ -53,7 +53,7 @@ export const getDishes = async (req: Request, res: Response, next: NextFunction)
 
     // ! replace this with dishmoel type same as server 
     type dishModelTmpType = {
-      restaurantId:string,
+      restaurantId: string,
       dishesCount: number,
       dishes: any
     }
@@ -63,7 +63,7 @@ export const getDishes = async (req: Request, res: Response, next: NextFunction)
       {
         $project: {
           restaurantId: 1,
-          dishesCount: {$size: "$dishes"},
+          dishesCount: { $size: "$dishes" },
           dishes: { $slice: ['$dishes', skip, LIMIT] },
         }
       }
@@ -75,7 +75,7 @@ export const getDishes = async (req: Request, res: Response, next: NextFunction)
       message,
       dishes: result[0],
       currentPage: Number(page),
-      numberOfPages: Math.ceil(result[0].dishesCount/LIMIT),
+      numberOfPages: Math.ceil(result[0].dishesCount / LIMIT),
       isListEnd
     })
     logger.info(message, { logData: formatHTTPLoggerResponse(req, res) })
@@ -105,7 +105,6 @@ export const addFavoriteRestaurants = async (req: authRequest, res: Response, ne
           { new: true }
         )
         favoriteRestaurant!.restaurantId = [restaurantId]
-
         message = 'favorite restaurant removed'
       } else {
         favoriteRestaurant = await favoriteRestaurantsModel.findOneAndUpdate(
@@ -113,7 +112,7 @@ export const addFavoriteRestaurants = async (req: authRequest, res: Response, ne
           { $addToSet: { restaurantId: restaurantId } },
           { new: true, select: { restaurantId: { $slice: -1 } } }
         )
-        message = 'favorite restaurant added'
+        message = `favorite restaurant added ${userId} ${restaurantId}`
       }
     } else {
       message = 'favorite restaurant added'
@@ -123,8 +122,10 @@ export const addFavoriteRestaurants = async (req: authRequest, res: Response, ne
       })
     }
 
-
-    res.status(httpStatus.OK).json({ message, restaurantId: favoriteRestaurant?.restaurantId[0] })
+    res.status(httpStatus.OK).json({
+      message,
+      restaurantId: favoriteRestaurant?.restaurantId[0]
+    })
     logger.info(message, { logData: formatHTTPLoggerResponse(req, res) })
 
   } catch (error) {
@@ -133,11 +134,17 @@ export const addFavoriteRestaurants = async (req: authRequest, res: Response, ne
 }
 
 export const getFavoriteRestaurants = async (req: authRequest, res: Response, next: NextFunction) => {
+  const { userId, query: { page = 1 } } = req
   try {
-    const { userId } = req
     const favoriteRestaurants = await favoriteRestaurantsModel.findOne({ userId: userId })
+    if (!favoriteRestaurants) {
+      throw new CustomError('get favorites failed ', httpStatus.INTERNAL_SERVER_ERROR)
+    }
     const message = 'get all favorite restaurants successs'
-    res.status(httpStatus.OK).json({ message, restaurantId: favoriteRestaurants?.restaurantId })
+    res.status(httpStatus.OK).json({
+      message,
+      restaurantIds: favoriteRestaurants.restaurantId
+    })
     logger.info(message, { logData: formatHTTPLoggerResponse(req, res) })
   } catch (error) {
     next(error)
@@ -171,14 +178,13 @@ export const addDish = async (req: Request, res: Response) => {
   const { restaurantId, data } = req.body
   // console.log(req.body)
   try {
-    const restaurantObjId = mongoose.Types.ObjectId.createFromHexString(restaurantId)
-    const isResturantDishesExsist = await dishModel.findById(restaurantObjId)
+    const isResturantDishesExsist = await dishModel.find({id:restaurantId})
     console.log(isResturantDishesExsist)
 
     let addedDish: dishesType | null
     if (isResturantDishesExsist) {
       addedDish = await dishModel.findByIdAndUpdate(
-        { _id: restaurantObjId },
+        { id: restaurantId },
         { $push: { dishes: data } },
         { new: true, select: { dishes: { $slice: -1 } } }
       )

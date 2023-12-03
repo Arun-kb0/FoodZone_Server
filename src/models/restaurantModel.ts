@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, trusted } from "mongoose";
 
 
 type OpeningHoursType = {
@@ -13,42 +13,84 @@ type OpeningHoursType = {
 
 
 
-interface restaurantType extends Document {
-  name: string,
-  cuisine: string,
-  deliveryDelay: string,
-  imageUrl: string,
-  distance: string,
-  rating: number,
-  menu: string[],
-  openingHours: OpeningHoursType
-  location: { lat: string, long: string }
-  timeStamp: Date
-}
+// interface restaurantType extends Document {
+//   name: string,
+//   cuisine: string,
+//   deliveryDelay: string,
+//   imageUrl: string,
+//   distance: string,
+//   rating: number,
+//   menu: string[],
+//   openingHours: OpeningHoursType
+//   location: { lat: string, long: string }
+//   timeStamp: Date
+// }
 
+
+// const restaurantSchema = new Schema<restaurantType>({
+//   Restaurant_Name: { type: String, required: true },
+//   cuisine: { type: String, required: true },
+//   deliveryDelay: { type: String, required: true },
+//   imageUrl: { type: String, required: true },
+//   distance: { type: String, required: true },
+//   rating: { type: Number, required: true },
+//   menu: { type: [String], default: [] },
+//   openingHours: {
+//     monday: String,
+//     tuesday: String,
+//     wednesday: String,
+//     thursday: String,
+//     friday: String,
+//     saturday: String,
+//     sunday: String,
+//   },
+//   location: {
+//     lat: String,
+//     long: String
+//   },
+//   timeStamp: { type: Date, default: new Date() }
+// })
+
+
+
+interface restaurantType extends Document {
+  Restaurant_Name: string;
+  Category: string[];
+  Pricing_for_2: string;
+  Locality: string;
+  Dining_Rating: string;
+  Dining_Review_Count: string;
+  Delivery_Rating: string;
+  Delivery_Rating_Count: string;
+  Website: string;
+  Address: string;
+  Phone_No: string;
+  Latitude: string;
+  Longitude: string;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  imageUrl: string;
+};
 
 const restaurantSchema = new Schema<restaurantType>({
-  name: { type: String, required: true },
-  cuisine: { type: String, required: true },
-  deliveryDelay: { type: String, required: true },
+  Restaurant_Name: {type:String,required:true},
+  Category: { type: [String], required: true },
+  Pricing_for_2: { type: String, required: true }, 
+  Locality: { type: String, required: true },
+  Dining_Rating: { type: String, required: true },
+  Dining_Review_Count: { type: String, required: true },
+  Delivery_Rating: { type: String, required: true },
+  Delivery_Rating_Count: { type: String, required: true },
+  Website: { type: String, required: true },
+  Address: { type: String, required: true },
+  Phone_No: { type: String, required: true },
+  Latitude: { type: String, required: true },
+  Longitude: { type: String, required: true },
+  id: { type: String, required: true },
+  createdAt: { type: String, required: true },
+  updatedAt: { type: String, required: true },
   imageUrl: { type: String, required: true },
-  distance: { type: String, required: true },
-  rating: { type: Number, required: true },
-  menu: { type: [String], default: [] },
-  openingHours: {
-    monday: String,
-    tuesday: String,
-    wednesday: String,
-    thursday: String,
-    friday: String,
-    saturday: String,
-    sunday: String,
-  },
-  location: {
-    lat: String,
-    long: String
-  },
-  timeStamp: { type: Date, default: new Date() }
 })
 
 export const restaurantModel = mongoose.model<restaurantType>('restaurants', restaurantSchema)
