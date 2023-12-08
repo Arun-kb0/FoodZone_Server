@@ -7,13 +7,13 @@ import { Request, Response, NextFunction } from "express"
 
 
 export const formatHTTPLoggerResponse = (req: Request, res: Response, responseMessage?: string,) => {
-  const formatedData = {
+  const formattedData = {
     request: {
       method: req.method,
       url: `${req.baseUrl}${req.url}`,
       origin: req.headers.origin,
       host: req.headers.host,
-      clentIp: req?.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      clientIp: req?.headers['x-forwarded-for'] || req.socket.remoteAddress,
     },
     response: {
       header: res.getHeaders(),
@@ -21,7 +21,7 @@ export const formatHTTPLoggerResponse = (req: Request, res: Response, responseMe
       responseMessage: responseMessage,
     }
   }
-  return formatedData
+  return formattedData
 }
 
 

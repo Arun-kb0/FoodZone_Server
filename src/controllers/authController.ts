@@ -4,25 +4,25 @@ import * as bcrypt from 'bcrypt'
 import { httpStatus } from "../constants/httpStatus"
 import { userModel } from "../models/userModel"
 import logger, { formatHTTPLoggerResponse } from "../logger/loggerIndex"
-import { CustomError } from "../util/customeError"
+import { CustomError } from "../util/customError"
 
 
-type genrateTokenParamsType = {
+type generateTokenParamsType = {
   email: string,
   id: string
 }
-export const generateAccessToken = ({ email, id }: genrateTokenParamsType) => {
-  const secrect = process.env.JWT_ACCESSTOKEN_SECRECT || ''
+export const generateAccessToken = ({ email, id }: generateTokenParamsType) => {
+  const secret = process.env.JWT_ACCESSTOKEN_SECRET || ''
   const accessToken = jwt.sign({
     email, id
-  }, secrect, { expiresIn: '1h' })
+  }, secret, { expiresIn: '1h' })
   return accessToken
 }
-export const generateRefreshToken = ({ email, id }: genrateTokenParamsType) => {
-  const secrect = process.env.JWT_REFRESHTOKEN_SECRECT || ''
+export const generateRefreshToken = ({ email, id }: generateTokenParamsType) => {
+  const secret = process.env.JWT_REFRESHTOKEN_SECRET || ''
   const refreshToken = jwt.sign({
     email, id
-  }, secrect, { expiresIn: '7d' })
+  }, secret, { expiresIn: '7d' })
   return refreshToken
 }
 
@@ -157,8 +157,8 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
       throw new CustomError('Query is empty or not a string', httpStatus.BAD_REQUEST)
     }
 
-    const secrect = process.env.JWT_REFRESHTOKEN_SECRECT || ''
-    const decodedData = jwt.verify(refreshToken, secrect)
+    const secret = process.env.JWT_REFRESHTOKEN_SECRET || ''
+    const decodedData = jwt.verify(refreshToken, secret)
     if (typeof (decodedData) === 'string') {
       throw new CustomError('invalid refresh token', httpStatus.FORBIDDEN)
     }

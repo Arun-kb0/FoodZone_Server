@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import { httpStatus } from '../constants/httpStatus';
-import { CustomError } from '../util/customeError';
+import { CustomError } from '../util/customError';
 
 
 export interface authRequest extends Request {
@@ -18,15 +18,15 @@ export const auth = async (req: authRequest, res: Response, next: NextFunction) 
     // console.log(req.headers)
 
     if (!token || !provider) {
-      throw new CustomError('token and provider is requiered in headder', httpStatus.UNAUTHORIZED)
+      throw new CustomError('token and provider is required in header', httpStatus.UNAUTHORIZED)
     }
     let decodedData
     if (provider === 'custom') {
       console.log("user token")
-      const secret = process.env.JWT_ACCESSTOKEN_SECRECT || ''
+      const secret = process.env.JWT_ACCESSTOKEN_SECRET || ''
       decodedData = jwt.verify(token, secret)
       if (!decodedData || typeof (decodedData) === 'string') {
-        throw new CustomError('jwt expiered',httpStatus.UNAUTHORIZED)
+        throw new CustomError('jwt expired',httpStatus.UNAUTHORIZED)
       }
       req.userId = decodedData?.id
       console.log("decodedData ", decodedData)
@@ -37,9 +37,9 @@ export const auth = async (req: authRequest, res: Response, next: NextFunction) 
       if (response.ok) {
         decodedData = await response.json()
         const currentTime = Math.floor(Date.now() / 1000)
-        const isTokenExpierd = currentTime >= parseInt(decodedData.exp)
-        if (isTokenExpierd) {
-          throw new CustomError('Google accessToken expierd', httpStatus.UNAUTHORIZED)
+        const isTokenExpired = currentTime >= parseInt(decodedData.exp)
+        if (isTokenExpired) {
+          throw new CustomError('Google accessToken expired', httpStatus.UNAUTHORIZED)
         }
         req.userId = decodedData?.sub
         console.log('Google token is valid')

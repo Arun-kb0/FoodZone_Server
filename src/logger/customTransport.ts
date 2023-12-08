@@ -1,10 +1,10 @@
 import winston, { format, LogEntry, } from 'winston'
-import Trasport, { TransportStreamOptions } from 'winston-transport'
+import Transport ,{ TransportStreamOptions } from 'winston-transport'
 
 const { timestamp, printf, json, combine } = format
 
 
-export class customeTrasport extends Trasport {
+export class customTransport extends Transport {
   constructor(opts: TransportStreamOptions) {
     super(opts)
   }

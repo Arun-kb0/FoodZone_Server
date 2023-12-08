@@ -2,8 +2,7 @@ import { NextFunction, Request, Response } from "express"
 import { restaurantModel } from "../models/restaurantModel"
 import { httpStatus } from "../constants/httpStatus"
 import { dishModel, dishesType } from "../models/dishModel"
-import mongoose from "mongoose"
-import { CustomError } from "../util/customeError"
+import { CustomError } from "../util/customError"
 import logger, { formatHTTPLoggerResponse } from "../logger/loggerIndex"
 import { authRequest } from "../middleware/auth"
 import { favoriteRestaurantType, favoriteRestaurantsModel } from "../models/favoriteModel"
@@ -140,7 +139,7 @@ export const getFavoriteRestaurants = async (req: authRequest, res: Response, ne
     if (!favoriteRestaurants) {
       throw new CustomError('get favorites failed ', httpStatus.INTERNAL_SERVER_ERROR)
     }
-    const message = 'get all favorite restaurants successs'
+    const message = 'get all favorite restaurants success'
     res.status(httpStatus.OK).json({
       message,
       restaurantIds: favoriteRestaurants.restaurantId
@@ -164,7 +163,7 @@ export const SearchByDish = async (req: Request, res: Response, next: NextFuncti
     const data = await restaurantModel.find({ Category: dishName }).skip(startIndex).limit(LIMIT).sort()
 
     if (!data) {
-      throw new CustomError('no resturants found', httpStatus.NO_CONTENT)
+      throw new CustomError('no restaurants found', httpStatus.NO_CONTENT)
     }
     const message = 'search dishes success'
     res.status(httpStatus.OK).json({
@@ -194,7 +193,7 @@ export const getRestaurantById = async (req: Request, res: Response, next: NextF
 
 
 // ! need to work
-export const getRecomentedRestaurants = async (req: Request, res: Response) => {
+export const getRecommencedRestaurants = async (req: Request, res: Response) => {
 
 }
 
@@ -219,11 +218,11 @@ export const addDish = async (req: Request, res: Response) => {
   const { restaurantId, data } = req.body
   // console.log(req.body)
   try {
-    const isResturantDishesExsist = await dishModel.find({ id: restaurantId })
-    console.log(isResturantDishesExsist)
+    const isRestaurantDishesExist = await dishModel.find({ id: restaurantId })
+    console.log(isRestaurantDishesExist)
 
     let addedDish: dishesType | null
-    if (isResturantDishesExsist) {
+    if (isRestaurantDishesExist) {
       addedDish = await dishModel.findByIdAndUpdate(
         { id: restaurantId },
         { $push: { dishes: data } },
@@ -240,6 +239,6 @@ export const addDish = async (req: Request, res: Response) => {
     res.status(httpStatus.OK).json({ message: "addDish success", addedDish })
   } catch (error) {
     console.log(error)
-    res.status(httpStatus.BAD_REQUEST).json({ message: "addDish faild", error: error })
+    res.status(httpStatus.BAD_REQUEST).json({ message: "addDish failed", error: error })
   }
 }

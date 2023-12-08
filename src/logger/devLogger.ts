@@ -1,5 +1,5 @@
 import winston, { format } from 'winston'
-import { customeTrasport } from './customTrasport'
+import { customTransport } from './customTransport'
 
 
 const logFormat = format.printf(({ level, message, timestamp, stack }) => {
@@ -15,7 +15,7 @@ export const devLogger = () => {
 
     transports: [
 
-      new customeTrasport({
+      new customTransport({
         level: 'info',
         format: format.json()
       }),

@@ -25,6 +25,6 @@ export const addMenu = async (req: Request, res: Response) => {
     const menu = await newMenu.save()
     res.status(httpStatus.OK).json({ message: "add Menu success", menu })
   } catch (error) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: "add Menu faild", error })
+    res.status(httpStatus.BAD_REQUEST).json({ message: "add Menu failed", error })
   }
 }

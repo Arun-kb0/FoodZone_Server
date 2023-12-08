@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import logger, { formatHTTPLoggerResponse }  from "../logger/loggerIndex"
-import { CustomError } from "../util/customeError"
+import { CustomError } from "../util/customError"
 import { httpStatus } from "../constants/httpStatus"
 
 
@@ -20,7 +20,7 @@ export const httpLogger = (req: Request, res: Response, next: NextFunction, mess
 
 
 
-const formatedErrorLog = (error: CustomError, req: Request, res: Response) => {
+const formattedErrorLog = (error: CustomError, req: Request, res: Response) => {
   return {
     errorName: error.name,
     errorMessage: error.message,
@@ -30,7 +30,7 @@ const formatedErrorLog = (error: CustomError, req: Request, res: Response) => {
       url: req.url,
       origin: req.headers.origin,
       host: req.headers.host,
-      clentIp: req?.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      clientIp: req?.headers['x-forwarded-for'] || req.socket.remoteAddress,
     },
     response: {
       header: res.getHeaders(),
@@ -57,7 +57,7 @@ export const globalErrorHandler = (error: CustomError, req: Request, res: Respon
     'info',
     error.message,
     {
-      logData: formatedErrorLog(error,req,res),
+      logData: formattedErrorLog(error,req,res),
       filename: 'ErrorLogs.log',
     }
   )
