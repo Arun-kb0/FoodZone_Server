@@ -1,13 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-// export interface dishType extends Document {
-//   dishName: string,
-//   description: string,
-//   imageUrl: string,
-//   price: number,
-//   rating: number,
-//   timeStamp: Date
-// }
 
 export type dishType = {
   id: string;
