@@ -3,6 +3,28 @@ import fs, { promises as fsPromises } from 'fs'
 import { join } from "path"
 import { prodLogger } from './prodLogger'
 import { devLogger } from './devLogger'
+import { Request, Response, NextFunction } from "express"
+
+
+export const formatHTTPLoggerResponse = (req: Request, res: Response, responseMessage?: string,) => {
+  const formattedData = {
+    request: {
+      method: req.method,
+      url: `${req.baseUrl}${req.url}`,
+      origin: req.headers.origin,
+      host: req.headers.host,
+      clientIp: req?.headers['x-forwarded-for'] || req.socket.remoteAddress,
+    },
+    response: {
+      header: res.getHeaders(),
+      statuscode: res.statusCode,
+      responseMessage: responseMessage,
+    }
+  }
+  return formattedData
+}
+
+
 
 const createLogDirectory = async () => {
   const curDir = process.cwd()

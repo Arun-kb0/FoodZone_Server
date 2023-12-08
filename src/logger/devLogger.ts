@@ -1,9 +1,9 @@
-import winston, { format, LogEntry } from 'winston'
-import { customeTrasport } from './customTrasport'
+import winston, { format } from 'winston'
+import { customTransport } from './customTransport'
 
 
-const logFormat = format.printf(({ level, message, timestamp , stack }) => {
-  return `${timestamp} ${level} ${stack || message }`
+const logFormat = format.printf(({ level, message, timestamp, stack }) => {
+  return `${timestamp} ${level} ${stack || message} `
 })
 
 
@@ -11,21 +11,31 @@ export const devLogger = () => {
 
   return winston.createLogger({
     level: 'info',
-    // format: format.combine(
-      // format.colorize(),
-    //   format.timestamp({ format: 'YYYY-MM-DD HH-mm-ss' }),
-    //   format.errors({ stack: true }),
-    //   logFormat,
-    // ),
     defaultMeta: { service: 'user-service' },
+
     transports: [
-      new customeTrasport({
+
+      new customTransport({
         level: 'info',
         format: format.json()
+      }),
+
+      new winston.transports.Console({
+        format: format.combine(
+          format.colorize(),
+          format.timestamp({ format: 'YYYY-MM-DD HH-mm-ss' }),
+          format.errors({ stack: true }),
+          format.printf(({ level, message, timestamp, stack }) => {
+            return `${timestamp} ${level} ${stack || message} `
+          })
+        ),
       })
 
     ]
+
   })
+
+  
 }
 
 

@@ -18,5 +18,9 @@
     "titleBar.inactiveBackground": "#3b076499",
     "titleBar.inactiveForeground": "#e7e7e799"
   },
-  "peacock.color": "#3b0764"
+  "peacock.color": "#3b0764",
+  "cSpell.words": [
+    "ACCESSTOKEN",
+    "REFRESHTOKEN"
+  ]
 }

@@ -20,4 +20,5 @@ const userSchema = new mongoose.Schema<userType>({
   timeStamp:{type:Date, default: new Date()}
 })
 
+userSchema.index({ id :1})
 export const userModel = mongoose.model('users',userSchema)

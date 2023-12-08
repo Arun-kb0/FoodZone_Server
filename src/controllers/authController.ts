@@ -1,22 +1,44 @@
-import { Request, Response } from "express"
+import { NextFunction, Request, Response } from "express"
 import jwt from 'jsonwebtoken'
 import * as bcrypt from 'bcrypt'
 import { httpStatus } from "../constants/httpStatus"
 import { userModel } from "../models/userModel"
-import { CustomeErrorTypes } from "../constants/customeErrorTypes"
+import logger, { formatHTTPLoggerResponse } from "../logger/loggerIndex"
+import { CustomError } from "../util/customError"
 
 
-export const signUp = async (req: Request, res: Response) => {
+type generateTokenParamsType = {
+  email: string,
+  id: string
+}
+export const generateAccessToken = ({ email, id }: generateTokenParamsType) => {
+  const secret = process.env.JWT_ACCESSTOKEN_SECRET || ''
+  const accessToken = jwt.sign({
+    email, id
+  }, secret, { expiresIn: '1h' })
+  return accessToken
+}
+export const generateRefreshToken = ({ email, id }: generateTokenParamsType) => {
+  const secret = process.env.JWT_REFRESHTOKEN_SECRET || ''
+  const refreshToken = jwt.sign({
+    email, id
+  }, secret, { expiresIn: '7d' })
+  return refreshToken
+}
+
+
+
+export const signUp = async (req: Request, res: Response, next: NextFunction) => {
   const { name, imageUrl, email, password, phone } = req.body
   try {
 
     if ((!name || !email || !password) || (name?.length === 0 || email?.length === 0 || password?.length === 0)) {
-      throw new Error(CustomeErrorTypes.EmptyFieldError)
+      throw new CustomError('Some of the required fields are empty', httpStatus.BAD_REQUEST)
     }
 
     const isEmailExists = await userModel.findOne({ email: email })
     if (isEmailExists) {
-      throw new Error(CustomeErrorTypes.EmailExists)
+      throw new CustomError('An account with this email already exists', httpStatus.CONFLICT)
     }
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
@@ -37,12 +59,15 @@ export const signUp = async (req: Request, res: Response) => {
       throw new Error('user creation failed')
     }
 
-    const secrect = process.env.JWT_SECRECT || ''
-    const accessToken = jwt.sign({
+    const accessToken = generateAccessToken({
       email: updatedUser.email,
-      id:updatedUser.id
-    }, secrect, { expiresIn: '1h' })
-    
+      id: updatedUser.id
+    })
+    const refreshToken = generateRefreshToken({
+      email: updatedUser.email,
+      id: updatedUser.id
+    })
+
     const user = {
       id: updatedUser.id,
       name: updatedUser.name,
@@ -51,94 +76,60 @@ export const signUp = async (req: Request, res: Response) => {
       phone: updatedUser.phone
     }
 
+    const message = "signup success"
     res.status(httpStatus.OK).json({
-      accessToken: accessToken,
+      accessToken,
+      refreshToken,
       user,
-      message: "signup success",
+      message
     })
+    logger.info(message, { logData: formatHTTPLoggerResponse(req, res) })
 
   } catch (error: any) {
-    // console.log(error)
-
-    if (error?.message === CustomeErrorTypes.EmailExists) {
-      return res.status(httpStatus.CONFLICT).json({
-        error: CustomeErrorTypes.EmailExists,
-        message: "An account with this email already exists."
-      })
-    }
-    if (error?.message === CustomeErrorTypes.EmptyFieldError) {
-      return res.status(httpStatus.BAD_REQUEST).json({
-        error: CustomeErrorTypes.EmptyFieldError,
-        message: 'Some of the required fields are empty'
-      })
-    }
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      error: error.message,
-      message: "signup failed"
-    })
+    next(error)
   }
 }
 
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body
   try {
-    if ((!email || !password ) || (email?.length === 0 || password?.length === 0)) {
-      throw new Error(CustomeErrorTypes.EmptyFieldError)
+    if ((!email || !password) || (email?.length === 0 || password?.length === 0)) {
+      throw new CustomError('required fields are empty', httpStatus.BAD_REQUEST)
     }
     const isUserExist = await userModel.findOne({ email: email })
     if (!isUserExist) {
-      throw new Error(CustomeErrorTypes.UserNotFound)
+      throw new CustomError('user not found', httpStatus.BAD_REQUEST)
     }
     const isPasswordOk = await bcrypt.compare(password, isUserExist.password)
     if (!isPasswordOk) {
-      throw new Error(CustomeErrorTypes.PasswordNotValid)
+      throw new CustomError('password not valid', httpStatus.BAD_REQUEST)
     }
 
-    const secrect = process.env.JWT_SECRECT || ''
-    const accessToken = jwt.sign({
+    const accessToken = generateAccessToken({
       email: isUserExist.email,
       id: isUserExist.id
-    }, secrect, { expiresIn: '1h' })
+    })
+    const refreshToken = generateRefreshToken({
+      email: isUserExist.email,
+      id: isUserExist.id
+    })
 
+    const message = "login success"
     res.status(httpStatus.OK).json({
-      accessToken: accessToken,
+      accessToken,
+      refreshToken,
       user: isUserExist,
-      message: "login success"
+      message
     })
-
+    logger.info(message, { logData: formatHTTPLoggerResponse(req, res) })
   } catch (error: any) {
-    console.log(error)
-
-    if (error?.message === CustomeErrorTypes.EmptyFieldError) {
-      return res.status(httpStatus.BAD_REQUEST).json({
-        error: CustomeErrorTypes.EmptyFieldError,
-        message: 'Some of the required fields are empty'
-      })
-    }
-    if (error?.message === CustomeErrorTypes.UserNotFound) {
-      return res.status(httpStatus.BAD_REQUEST).json({
-        error: CustomeErrorTypes.UserNotFound,
-        message: "User with given email is not found",
-      })
-    }
-    if (error?.message === CustomeErrorTypes.PasswordNotValid) {
-      return res.status(httpStatus.BAD_REQUEST).json({
-        error: CustomeErrorTypes.PasswordNotValid,
-        message: "Invalid password",
-      })
-    }
-
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      error: error.message,
-      message: "login failed",
-    })
-
+    next(error)
   }
 }
 
 
-export const socialLogin = async (req: Request, res: Response) => {
+export const socialLogin = async (req: Request, res: Response , next:NextFunction) => {
   const { id, name, email, photo, phone } = req.body
   try {
     const user = await userModel.findOne({ id: id })
@@ -150,8 +141,40 @@ export const socialLogin = async (req: Request, res: Response) => {
     } else {
       console.log('user already exists')
     }
-    res.status(httpStatus.OK).json({ message: "social login success", newUser })
-  } catch (error) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: "social login failed" })
+    const message = 'social login success'
+    res.status(httpStatus.OK).json({ message, newUser })
+    logger.info(message, { logData: formatHTTPLoggerResponse(req, res, message) })
+  } catch (error: any) {
+    next(error)
   }
+}
+
+
+export const refresh = async (req: Request, res: Response, next: NextFunction) => {
+  const { refreshToken } = req.query
+  try {
+    if (!refreshToken || typeof (refreshToken) !== 'string' || refreshToken?.length === 0) {
+      throw new CustomError('Query is empty or not a string', httpStatus.BAD_REQUEST)
+    }
+
+    const secret = process.env.JWT_REFRESHTOKEN_SECRET || ''
+    const decodedData = jwt.verify(refreshToken, secret)
+    if (typeof (decodedData) === 'string') {
+      throw new CustomError('invalid refresh token', httpStatus.FORBIDDEN)
+    }
+
+    const newAccessToken = generateAccessToken({
+      id: decodedData?.id,
+      email: decodedData?.email
+    })
+    const message = 'refresh success'
+    res.status(httpStatus.OK).json({
+      accessToken: newAccessToken,
+      message
+    })
+    logger.info(message,{ logData: formatHTTPLoggerResponse(req, res) })
+  } catch (error: any) {
+    next(error)
+  }
+
 }

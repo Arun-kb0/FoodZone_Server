@@ -1,5 +1,5 @@
 import winston, { format, } from 'winston'
-import { customeTrasport } from './customTrasport'
+import { customTransport } from './customTransport'
 
 
 
@@ -14,7 +14,7 @@ export const prodLogger = () => {
     
     defaultMeta: { service: 'user-service' },
     transports: [
-      new customeTrasport({
+      new customTransport({
         level: 'info',
         format: format.json()
       })
