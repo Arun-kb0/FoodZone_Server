@@ -1,16 +1,6 @@
 import mongoose, { Document, Schema, trusted } from "mongoose";
 
 
-type OpeningHoursType = {
-  monday: string;
-  tuesday: string;
-  wednesday: string;
-  thursday: string;
-  friday: string;
-  saturday: string;
-  sunday: string;
-};
-
 interface restaurantType extends Document {
   Restaurant_Name: string;
   Category: string[];
@@ -57,8 +47,4 @@ restaurantSchema.index({ Dining_Rating: 1 })
 restaurantSchema.index({ Delivery_Rating: 1 })
 restaurantSchema.index({ Category: 1 })
 
-
 export const restaurantModel = mongoose.model<restaurantType>('restaurants', restaurantSchema)
-
-
-
